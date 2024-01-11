@@ -1,0 +1,29 @@
+* {
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+}
+
+html,
+body {
+  user-select: none; /* Standard syntax */
+  -moz-user-select: none; /* Firefox */
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+}
+
+#pop-count {
+  font-size: min(10vw, 10vh);
+  font-family: impact, Arial, sans-serif;
+  position: absolute;
+  top: 3vh;
+  right: 3vw;
+  z-index: 1;
+}
+
+canvas {
+  width: 100%;
+  height: 100vh;
+  background-image: linear-gradient(to bottom right, lightBlue, LightSteelBlue);
+  position: fixed;
+}
