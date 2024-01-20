@@ -6,24 +6,49 @@
 
 html,
 body {
+  background-color: black;
   user-select: none; /* Standard syntax */
   -moz-user-select: none; /* Firefox */
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
 }
 
-#pop-count {
+#overlay {
+  --top: 0;
+  --right: 0;
+  top: var(--top);
+  right: var(--right);
   font-size: min(10vw, 10vh);
   font-family: impact, Arial, sans-serif;
   position: absolute;
-  top: 3vh;
-  right: 3vw;
   z-index: 1;
 }
 
-canvas {
-  width: 100%;
+#game {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100vh;
+}
+
+/* #info {
+  width: 100px;
+  height: 100vh;
+  color: white;
+  background-color: black;
+} */
+
+canvas {
+  /* --r: 960 / 540; */
+  --r: 1;
+
+  width: min(90%, min(960px, 90vh * (var(--r))));
+  aspect-ratio: var(--r);
+  /* min-width: 300px;
+  min-height: 300px; */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background-image: linear-gradient(to bottom right, lightBlue, LightSteelBlue);
-  position: fixed;
 }

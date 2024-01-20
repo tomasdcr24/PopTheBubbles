@@ -14,17 +14,33 @@ var bubbles = [];
 var popCount = 0;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
+var overlay = document.getElementById("overlay");
+canvas.style.setProperty("--r", ASPECT_RATIO);
+
 window.addEventListener("click", clickBubble);
 
-/* window.addEventListener("resize", resizeCanvas); */
+window.addEventListener("resize", resizeCanvas);
 
-/* function resizeCanvas() {
-  draw();
-} */
+function repositionOverlay() {
+  overlay.style.setProperty(
+    "--right",
+    "calc(" + canvas.offsetLeft + "px" + " + 0.25em)"
+  );
+  overlay.style.setProperty(
+    "--top",
+    "calc(" + canvas.offsetTop + "px" + " + 0.25em)"
+  );
+}
+
+repositionOverlay();
+
+function resizeCanvas() {
+  repositionOverlay();
+}
 
 function clickBubble(event) {
-  let clickX = event.clientX;
-  let clickY = event.clientY;
+  let clickX = event.clientX - canvas.offsetLeft;
+  let clickY = event.clientY - canvas.offsetTop;
   let currBubble = bubbles.length - 1;
   while (currBubble >= 0) {
     let bubX = bubbles[currBubble].x;
@@ -37,7 +53,7 @@ function clickBubble(event) {
       let popBubble = bubbles[currBubble].popBubble();
       if (popBubble) {
         bubbles.splice(currBubble, 1);
-        document.getElementById("pop-count").innerText = ++popCount;
+        overlay.innerText = ++popCount;
       }
     }
     currBubble--;
@@ -47,9 +63,9 @@ function clickBubble(event) {
 function addBubble(x, y, radius, color, speed, clicksToPop) {
   if (bubbles.length < MAX_BUBBLES) {
     if (arguments.length === 0) {
-      x = randomInt(canvas.width / 10, (canvas.width * 9) / 10);
-      y = randomInt(canvas.height / 10, (canvas.height * 9) / 10);
       radius = randomInt(MIN_RADIUS, MAX_RADIUS);
+      x = randomInt(radius, canvas.width - radius);
+      y = randomInt(radius, canvas.height - radius);
       color = BUBBLE_COLOR;
       speed = BUBBLE_SPEED;
       clicksToPop = CLICKS_TO_POP;
@@ -96,13 +112,10 @@ function drawBubbles(width, height) {
 function draw() {
   let width = canvas.clientWidth;
   let height = canvas.clientHeight;
-  /* if (width > height) width = height;
-  else height = width; */
   canvas.width = width;
   canvas.height = height;
   ctx.clearRect(0, 0, width, height);
   drawBubbles(width, height);
-
   window.requestAnimationFrame(draw);
 }
 
