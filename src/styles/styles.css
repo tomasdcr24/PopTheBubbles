@@ -39,13 +39,13 @@ body {
 } */
 
 canvas {
-  /* --r: 960 / 540; */
   --r: 1;
 
-  width: min(90%, min(960px, 90vh * (var(--r))));
+  width: min(100%, 100vh * (var(--r)));
   aspect-ratio: var(--r);
-  /* min-width: 300px;
-  min-height: 300px; */
+
+  min-width: 250px;
+  min-height: calc(min-width / var(--r));
 
   display: flex;
   justify-content: center;

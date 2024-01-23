@@ -1,14 +1,14 @@
-import { randomInt } from "./utils/random.js";
-import Bubble from "./helpers/bubble.js";
+import { randomFloat } from "./utils/random.js";
+import Bubble from "./objects/bubble.js";
 
-const ASPECT_RATIO = screen.width / screen.height;
+const ASPECT_RATIO = 1; //screen.width / screen.height;
 const MAX_BUBBLES = 20;
-const MIN_RADIUS = 20;
-const MAX_RADIUS = 40;
+const MIN_RADIUS = 0.05;
+const MAX_RADIUS = 0.1;
 const BUBBLE_COLOR = "Azure";
-const BUBBLE_SPEED = 0.2;
-const CLICKS_TO_POP = 1;
-const SPAWN_TIME = 400;
+const MIN_SPEED = 0.1;
+const MAX_SPEED = 0.2;
+const SPAWN_TIME = 300;
 
 var bubbles = [];
 var popCount = 0;
@@ -38,9 +38,10 @@ function resizeCanvas() {
   repositionOverlay();
 }
 
+// handle bubble popping when clicked
 function clickBubble(event) {
-  let clickX = event.clientX - canvas.offsetLeft;
-  let clickY = event.clientY - canvas.offsetTop;
+  let clickX = (event.clientX - canvas.offsetLeft) / canvas.width;
+  let clickY = (event.clientY - canvas.offsetTop) / canvas.height;
   let currBubble = bubbles.length - 1;
   while (currBubble >= 0) {
     let bubX = bubbles[currBubble].x;
@@ -60,55 +61,96 @@ function clickBubble(event) {
   }
 }
 
-function addBubble(x, y, radius, color, speed, clicksToPop) {
+// create bubble and add it to bubbles array
+function addBubble(x, y, radius, color, x_speed, y_speed) {
   if (bubbles.length < MAX_BUBBLES) {
     if (arguments.length === 0) {
-      radius = randomInt(MIN_RADIUS, MAX_RADIUS);
-      x = randomInt(radius, canvas.width - radius);
-      y = randomInt(radius, canvas.height - radius);
+      radius = randomFloat(MIN_RADIUS, MAX_RADIUS);
+      x = randomFloat(radius + 0.05, 1 - radius - 0.05);
+      y = randomFloat(radius + 0.05, 1 - radius - 0.05);
       color = BUBBLE_COLOR;
-      speed = BUBBLE_SPEED;
-      clicksToPop = CLICKS_TO_POP;
+      x_speed = randomFloat(MIN_SPEED, MAX_SPEED) / canvas.width;
+      y_speed = randomFloat(MIN_SPEED, MAX_SPEED) / canvas.height;
     }
-    bubbles.push(new Bubble(x, y, radius, color, speed, clicksToPop));
+    bubbles.push(new Bubble(x, y, radius, color, x_speed, y_speed));
   }
 }
 
+// draw a bubble
 function drawBubbles(width, height) {
   let currBubble = 0;
   let numBubbles = bubbles.length;
 
   while (currBubble < numBubbles) {
-    //TODO fix bubble to make it look better
     let { x, y, radius, color } = bubbles[currBubble];
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    let gradient = ctx.createRadialGradient(
-      x - radius * 0.55,
-      y - radius * 0.55,
-      radius / 8,
-      x - radius * 0.55,
-      y - radius * 0.55,
-      radius / 10
-    );
-    gradient.addColorStop(0, "#ffffff20");
-    gradient.addColorStop(0.5, color);
-    gradient.addColorStop(1, "#ffffff90");
-    ctx.fillStyle = gradient;
 
-    ctx.fill();
+    //outline
     ctx.shadowBlur = 1;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
     ctx.shadowColor = color;
     ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = (radius * Math.max(width, height)) / 50;
+
+    //gradient for coloring
+    const grd = ctx.createLinearGradient(
+      (x - radius) * width,
+      (y - radius) * height,
+
+      (x - radius / -1) * width,
+      (y - radius / -1) * height
+    );
+    grd.addColorStop(0, "white");
+    grd.addColorStop(0.5, color);
+    grd.addColorStop(1, "grey");
+
+    // bubble
+    ctx.beginPath();
+    ctx.arc(
+      x * width,
+      y * height,
+      radius * Math.max(width, height),
+      0,
+      Math.PI * 2
+    );
+    ctx.globalAlpha = 0.2;
+    ctx.fillStyle = grd;
+    ctx.fill();
     ctx.stroke();
-    ctx.globalAlpha = 1;
-    bubbles[currBubble].updatePos(width, height);
+
+    //bubble small ball detail
+    ctx.beginPath();
+    ctx.arc(
+      (x - radius / 1.4) * width,
+      (y - radius / 4) * height,
+      (radius * Math.max(width, height)) / 15,
+      0,
+      Math.PI * 2
+    );
+    ctx.globalAlpha = 0.4;
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.stroke();
+
+    //bubble small ellipse detail
+    ctx.beginPath();
+    ctx.ellipse(
+      (x - radius / 2.2) * width,
+      (y - radius / 1.6) * height,
+      (radius * Math.max(width, height)) / 8,
+      (radius * Math.max(width, height)) / 4,
+      Math.PI / 4,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
+    ctx.stroke();
+
+    bubbles[currBubble].updatePos();
     currBubble++;
   }
 }
 
+//draw canvas and elements
 function draw() {
   let width = canvas.clientWidth;
   let height = canvas.clientHeight;
