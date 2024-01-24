@@ -1,5 +1,6 @@
 import { randomFloat } from "./utils/random.js";
 import Bubble from "./objects/bubble.js";
+import PoppingBubble from "./objects/poppingBubble.js";
 
 const ASPECT_RATIO = 1; //screen.width / screen.height;
 const MAX_BUBBLES = 20;
@@ -11,6 +12,7 @@ const MAX_SPEED = 0.2;
 const SPAWN_TIME = 300;
 
 var bubbles = [];
+var poppingBubbles = [];
 var popCount = 0;
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
@@ -51,11 +53,9 @@ function clickBubble(event) {
     let yDist = (bubY - clickY) * (bubY - clickY);
     let bubbleClicked = xDist + yDist <= bubRad * bubRad;
     if (bubbleClicked) {
-      let popBubble = bubbles[currBubble].popBubble();
-      if (popBubble) {
-        bubbles.splice(currBubble, 1);
-        overlay.innerText = ++popCount;
-      }
+      poppingBubbles.push(new PoppingBubble(bubX, bubY, bubRad));
+      bubbles.splice(currBubble, 1);
+      overlay.innerText = ++popCount;
     }
     currBubble--;
   }
@@ -76,7 +76,7 @@ function addBubble(x, y, radius, color, x_speed, y_speed) {
   }
 }
 
-// draw a bubble
+// draw bubbles on screen
 function drawBubbles(width, height) {
   let currBubble = 0;
   let numBubbles = bubbles.length;
@@ -150,6 +150,48 @@ function drawBubbles(width, height) {
   }
 }
 
+// draw bubbles popping on screen
+function drawPoppingBubbles(width, height) {
+  let currBubble = 0;
+  let numBubbles = poppingBubbles.length;
+  let cleanUpBubbles = [];
+
+  while (currBubble < numBubbles) {
+    let { x, y, radius } = poppingBubbles[currBubble];
+
+    const grd = ctx.createRadialGradient(
+      x * width,
+      y * height,
+      (radius * Math.max(width, height)) / 10,
+      x * width,
+      y * height,
+      radius * Math.max(width, height) * 10
+    );
+    grd.addColorStop(0, "transparent");
+    grd.addColorStop(1, "black");
+
+    ctx.fillStyle = grd;
+    ctx.moveTo(x, y);
+    ctx.beginPath();
+    ctx.arc(
+      x * width,
+      y * height,
+      radius * Math.max(width, height),
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+
+    if (poppingBubbles[currBubble].pop()) {
+      cleanUpBubbles.push(currBubble);
+    }
+    currBubble++;
+  }
+
+  cleanUpBubbles.forEach((bubPos) => poppingBubbles.splice(bubPos, 1));
+}
+
 //draw canvas and elements
 function draw() {
   let width = canvas.clientWidth;
@@ -158,6 +200,7 @@ function draw() {
   canvas.height = height;
   ctx.clearRect(0, 0, width, height);
   drawBubbles(width, height);
+  drawPoppingBubbles(width, height);
   window.requestAnimationFrame(draw);
 }
 

@@ -31,13 +31,6 @@ body {
   height: 100vh;
 }
 
-/* #info {
-  width: 100px;
-  height: 100vh;
-  color: white;
-  background-color: black;
-} */
-
 canvas {
   --r: 1;
 

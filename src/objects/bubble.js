@@ -2,6 +2,7 @@ const BUBBLE_GROWTH = 200;
 
 class Bubble {
   constructor(x, y, radius, color, x_speed, y_speed) {
+    // s0: growing, s1: fully grown
     this.state = 0;
     this.x = x;
     this.y = y;
@@ -14,13 +15,13 @@ class Bubble {
   }
 
   updatePos() {
-    //update x and y positions
+    // update x and y positions
     this.x += Math.cos(this.direction) * this.x_speed;
     this.y += Math.sin(this.direction) * this.y_speed;
 
     // grow bubble if in growth state
     if (this.state === 0) {
-      if (this.radius >= this.maxRadius) this.state === 1;
+      if (this.radius >= this.maxRadius) this.state = 1;
       else this.radius += this.maxRadius / BUBBLE_GROWTH;
     }
 
@@ -54,10 +55,6 @@ class Bubble {
         Math.cos(this.direction)
       );
     }
-  }
-
-  popBubble() {
-    return true;
   }
 }
 
